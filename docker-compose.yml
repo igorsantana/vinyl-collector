@@ -1,0 +1,50 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: vinyl_catalog
+      POSTGRES_USER: vinyl
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-vinyl_secret}
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vinyl -d vinyl_catalog"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  migrate:
+    build:
+      context: .
+      target: builder       # full node_modules — Prisma CLI works here
+    command: npx prisma migrate deploy
+    environment:
+      DATABASE_URL: postgresql://vinyl:${POSTGRES_PASSWORD:-vinyl_secret}@postgres:5432/vinyl_catalog
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"           # run once and exit
+
+  app:
+    build:
+      context: .
+      target: runner
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://vinyl:${POSTGRES_PASSWORD:-vinyl_secret}@postgres:5432/vinyl_catalog
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      NODE_ENV: production
+    volumes:
+      - uploads:/app/public/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+volumes:
+  pg-data:
+  uploads:
