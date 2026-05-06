@@ -1,65 +1,93 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useEffect, useState, useCallback } from "react";
+import RecordCard from "@/components/catalog/RecordCard";
+import SearchBar from "@/components/catalog/SearchBar";
+import FilterPanel from "@/components/catalog/FilterPanel";
+import { Disc3, Plus } from "lucide-react";
+import Link from "next/link";
+import type { Record } from "@/generated/prisma/client";
+
+export default function CatalogPage() {
+  const [records, setRecords] = useState<Record[]>([]);
+  const [search, setSearch] = useState("");
+  const [genre, setGenre] = useState("");
+  const [format, setFormat] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchRecords = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (search) params.set("search", search);
+      if (genre) params.set("genre", genre);
+      if (format) params.set("format", format);
+      const res = await fetch(`/api/records?${params}`);
+      if (res.ok) setRecords(await res.json());
+    } catch (err) {
+      console.error("Failed to fetch records:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [search, genre, format]);
+
+  useEffect(() => { fetchRecords(); }, [fetchRecords]);
+
+  const genres = [...new Set(records.map((r) => r.genre).filter(Boolean))] as string[];
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="px-4 py-5 max-w-6xl mx-auto space-y-5">
+      {/* Search & Filters */}
+      <div className="space-y-3">
+        <SearchBar value={search} onChange={setSearch} />
+        <div className="flex items-center justify-between">
+          <FilterPanel genres={genres} selectedGenre={genre} selectedFormat={format} onGenreChange={setGenre} onFormatChange={setFormat} />
+          <Link href="/scan" className="flex items-center gap-2 px-4 py-3 rounded-xl font-medium text-sm min-h-[44px] transition-all duration-200" style={{ background: "var(--accent)", color: "var(--background)" }}>
+            <Plus size={18} />
+            Add Record
+          </Link>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </div>
+
+      {/* Stats */}
+      <div className="flex items-center gap-2 text-xs" style={{ color: "var(--foreground-subtle)" }}>
+        <Disc3 size={14} />
+        <span>{records.length} record{records.length !== 1 ? "s" : ""} in collection</span>
+      </div>
+
+      {/* Grid */}
+      {isLoading ? (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="rounded-2xl overflow-hidden" style={{ border: "1px solid var(--border-subtle)" }}>
+              <div className="aspect-square shimmer" />
+              <div className="p-3 space-y-2">
+                <div className="h-4 w-3/4 rounded shimmer" />
+                <div className="h-3 w-1/2 rounded shimmer" />
+              </div>
+            </div>
+          ))}
         </div>
-      </main>
+      ) : records.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20 gap-4 text-center">
+          <div className="w-24 h-24 rounded-full flex items-center justify-center" style={{ background: "var(--surface-elevated)" }}>
+            <Disc3 size={40} style={{ color: "var(--foreground-subtle)" }} />
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold" style={{ color: "var(--foreground-muted)" }}>{search || genre || format ? "No records found" : "Your collection is empty"}</h2>
+            <p className="text-sm mt-1" style={{ color: "var(--foreground-subtle)" }}>{search || genre || format ? "Try adjusting your search or filters" : "Scan your first vinyl record to get started"}</p>
+          </div>
+          {!search && !genre && !format && (
+            <Link href="/scan" className="flex items-center gap-2 px-6 py-3 rounded-xl font-medium text-sm" style={{ background: "var(--accent)", color: "var(--background)" }}>
+              <Plus size={18} /> Scan First Record
+            </Link>
+          )}
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 stagger-children">
+          {records.map((record) => <RecordCard key={record.id} record={record} />)}
+        </div>
+      )}
     </div>
   );
 }
