@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Disc3, Camera, Download } from "lucide-react";
+import { cn } from "@cyberdeck/ui";
 
 const NAV_ITEMS = [
   { href: "/", label: "Catalog", icon: Disc3 },
@@ -15,13 +16,10 @@ export default function BottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 glass"
-      style={{
-        paddingBottom: "env(safe-area-inset-bottom, 0px)",
-        borderTop: "1px solid var(--border-subtle)",
-      }}
+      className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/90 backdrop-blur-sm"
+      style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
     >
-      <div className="flex items-center justify-around max-w-lg mx-auto h-16">
+      <div className="mx-auto flex h-16 max-w-lg items-center justify-around">
         {NAV_ITEMS.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
@@ -30,24 +28,24 @@ export default function BottomNav() {
             <Link
               key={item.href}
               href={item.href}
-              className="flex flex-col items-center justify-center gap-1 min-w-[72px] min-h-[44px] rounded-xl transition-all duration-200"
-              style={{
-                color: isActive ? "var(--accent)" : "var(--foreground-muted)",
-              }}
+              className={cn(
+                "flex min-h-[44px] min-w-[72px] flex-col items-center justify-center gap-1 rounded-md transition-colors",
+                isActive ? "text-accent" : "text-muted-foreground",
+              )}
             >
               <div
-                className="flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-200"
-                style={{
-                  background: isActive ? "var(--accent-muted)" : "transparent",
-                }}
+                className={cn(
+                  "flex h-10 w-10 items-center justify-center rounded-md transition-colors",
+                  isActive && "bg-accent/15",
+                )}
               >
                 <Icon size={22} strokeWidth={isActive ? 2.5 : 1.8} />
               </div>
               <span
-                className="text-xs font-medium"
-                style={{
-                  color: isActive ? "var(--accent)" : "var(--foreground-subtle)",
-                }}
+                className={cn(
+                  "text-xs font-medium",
+                  isActive ? "text-accent" : "text-muted-foreground/80",
+                )}
               >
                 {item.label}
               </span>

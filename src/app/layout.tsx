@@ -23,17 +23,20 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#0a0a0f",
+  themeColor: "#e6e4d5",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
-      <body className="min-h-dvh flex flex-col" style={{ background: "var(--background)" }}>
+    <html
+      lang="en"
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+    >
+      <body className="min-h-dvh flex flex-col bg-background text-foreground">
         <Header />
         <main className="flex-1 pb-24 scroll-container">{children}</main>
         <BottomNav />
-        <Toaster position="top-center" theme="dark" richColors toastOptions={{ style: { background: "var(--surface-elevated)", border: "1px solid var(--border)", color: "var(--foreground)" } }} />
+        <Toaster position="top-center" theme="light" richColors toastOptions={{ style: { background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", color: "hsl(var(--foreground))" } }} />
       </body>
     </html>
   );
