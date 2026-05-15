@@ -1,5 +1,6 @@
 "use client";
 
+import { Pane } from "@cyberdeck/ui";
 import Image from "next/image";
 import Link from "next/link";
 import { Disc3, Calendar, Music, Tag } from "lucide-react";
@@ -10,28 +11,20 @@ interface RecordCardProps {
 }
 
 export default function RecordCard({ record }: RecordCardProps) {
-  const confidenceColor =
+  const confidenceClass =
     (record.confidence ?? 0) >= 0.8
-      ? "var(--success)"
+      ? "text-[hsl(var(--success))]"
       : (record.confidence ?? 0) >= 0.5
-        ? "var(--accent)"
-        : "var(--danger)";
+        ? "text-primary"
+        : "text-destructive";
 
   return (
-    <Link href={`/records/${record.id}`}>
-      <div
-        className="group relative overflow-hidden rounded-2xl transition-all duration-300 cursor-pointer"
-        style={{
-          background: "var(--gradient-card)",
-          border: "1px solid var(--border-subtle)",
-          boxShadow: "var(--shadow-sm)",
-        }}
+    <Link href={`/records/${record.id}`} className="block">
+      <Pane
+        className="hover-lift group cursor-pointer overflow-hidden bg-card"
+        contentClassName="p-0"
       >
-        {/* Cover Image */}
-        <div
-          className="relative aspect-square overflow-hidden"
-          style={{ background: "var(--surface)" }}
-        >
+        <div className="relative aspect-square overflow-hidden bg-muted">
           {record.imageUrl ? (
             <Image
               src={record.imageUrl}
@@ -41,75 +34,48 @@ export default function RecordCard({ record }: RecordCardProps) {
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             />
           ) : (
-            <div className="flex items-center justify-center w-full h-full">
-              <Disc3
-                size={48}
-                style={{ color: "var(--foreground-subtle)" }}
-              />
+            <div className="flex h-full w-full items-center justify-center">
+              <Disc3 size={48} className="text-muted-foreground" />
             </div>
           )}
 
-          {/* Confidence Badge */}
           {record.confidence != null && (
             <div
-              className="absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-bold"
-              style={{
-                background: "rgba(0, 0, 0, 0.7)",
-                color: confidenceColor,
-                backdropFilter: "blur(8px)",
-              }}
+              className={`absolute right-2 top-2 rounded-full bg-background/80 px-2 py-1 text-xs font-bold backdrop-blur-sm ${confidenceClass}`}
             >
               {Math.round(record.confidence * 100)}%
             </div>
           )}
 
-          {/* Format Badge */}
-          <div
-            className="absolute bottom-2 left-2 px-2 py-1 rounded-full text-xs font-medium"
-            style={{
-              background: "rgba(0, 0, 0, 0.7)",
-              color: "var(--foreground-muted)",
-              backdropFilter: "blur(8px)",
-            }}
-          >
+          <div className="absolute bottom-2 left-2 rounded-full bg-background/80 px-2 py-1 text-xs font-medium text-muted-foreground backdrop-blur-sm">
             {record.format}
           </div>
         </div>
 
-        {/* Info */}
-        <div className="p-3 space-y-1.5">
-          <h3
-            className="font-semibold text-sm leading-tight truncate"
-            style={{ color: "var(--foreground)" }}
-          >
+        <div className="space-y-1.5 border-t border-border p-3">
+          <h3 className="truncate text-sm font-semibold leading-tight text-foreground">
             {record.title}
           </h3>
-          <p
-            className="text-xs truncate flex items-center gap-1"
-            style={{ color: "var(--foreground-muted)" }}
-          >
+          <p className="flex items-center gap-1 truncate text-xs text-muted-foreground">
             <Music size={12} />
             {record.artist}
           </p>
-          <div
-            className="flex items-center gap-3 text-xs"
-            style={{ color: "var(--foreground-subtle)" }}
-          >
-            {record.year && (
+          <div className="flex items-center gap-3 text-xs text-muted-foreground/80">
+            {record.year ? (
               <span className="flex items-center gap-1">
                 <Calendar size={11} />
                 {record.year}
               </span>
-            )}
-            {record.genre && (
+            ) : null}
+            {record.genre ? (
               <span className="flex items-center gap-1 truncate">
                 <Tag size={11} />
                 {record.genre}
               </span>
-            )}
+            ) : null}
           </div>
         </div>
-      </div>
+      </Pane>
     </Link>
   );
 }

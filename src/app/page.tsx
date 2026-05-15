@@ -42,7 +42,7 @@ export default function CatalogPage() {
         <SearchBar value={search} onChange={setSearch} />
         <div className="flex items-center justify-between">
           <FilterPanel genres={genres} selectedGenre={genre} selectedFormat={format} onGenreChange={setGenre} onFormatChange={setFormat} />
-          <Link href="/scan" className="flex items-center gap-2 px-4 py-3 rounded-xl font-medium text-sm min-h-[44px] transition-all duration-200" style={{ background: "var(--accent)", color: "var(--background)" }}>
+          <Link href="/scan" className="flex items-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-medium text-primary-foreground min-h-[44px] transition-colors duration-200 active-press hover:opacity-95">
             <Plus size={18} />
             Add Record
           </Link>
@@ -60,10 +60,10 @@ export default function CatalogPage() {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {Array.from({ length: 8 }).map((_, i) => (
             <div key={i} className="rounded-2xl overflow-hidden" style={{ border: "1px solid var(--border-subtle)" }}>
-              <div className="aspect-square shimmer" />
+              <div className="aspect-square pulse-scan bg-muted" />
               <div className="p-3 space-y-2">
-                <div className="h-4 w-3/4 rounded shimmer" />
-                <div className="h-3 w-1/2 rounded shimmer" />
+                <div className="h-4 w-3/4 rounded pulse-scan bg-muted" />
+                <div className="h-3 w-1/2 rounded pulse-scan bg-muted" />
               </div>
             </div>
           ))}
@@ -78,7 +78,7 @@ export default function CatalogPage() {
             <p className="text-sm mt-1" style={{ color: "var(--foreground-subtle)" }}>{search || genre || format ? "Try adjusting your search or filters" : "Scan your first vinyl record to get started"}</p>
           </div>
           {!search && !genre && !format && (
-            <Link href="/scan" className="flex items-center gap-2 px-6 py-3 rounded-xl font-medium text-sm" style={{ background: "var(--accent)", color: "var(--background)" }}>
+            <Link href="/scan" className="flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-medium text-primary-foreground active-press">
               <Plus size={18} /> Scan First Record
             </Link>
           )}
